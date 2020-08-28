@@ -1,0 +1,57 @@
+version: '3.3'
+
+networks:
+  frontend:
+    driver: ${NETWORKS_DRIVER}
+  backend:
+    driver: ${NETWORKS_DRIVER}
+
+volumes:
+  mysql:
+    driver: ${VOLUMES_DRIVER}
+  redis:
+    driver: ${VOLUMES_DRIVER}
+
+services:
+  nginx:
+    build:
+      context: ./docker/nginx
+    volumes:
+      - ./docker/nginx/sites:/etc/nginx/conf.d
+    ports:
+      - 80:80
+    networks:
+      - backend
+      - frontend
+
+  workspace:
+    user: "${UID}:${GID}"
+    build:
+      context: ./docker/workspace
+    volumes:
+      - ./frontend:/workspace/frontend
+      - ./backend:/workspace/backend
+    networks:
+      - backend
+      - frontend
+
+  frontend:
+    build:
+      context: ./docker/workspace
+    volumes:
+      - ./frontend:/workspace/frontend
+      - ./backend:/workspace/backend
+    networks:
+      - backend
+      - frontend
+
+  backend:
+    build:
+      context: ./docker/workspace
+    volumes:
+      - ./frontend:/workspace/frontend
+      - ./backend:/workspace/backend
+    networks:
+      - backend
+      - frontend
+
